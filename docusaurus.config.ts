@@ -3,9 +3,9 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Settled Docs',
-  tagline: 'Protocol documentation for Settled prediction markets',
-  favicon: 'img/favicon.ico',
+  title: 'Settled Documentation',
+  tagline: 'On-chain prediction markets for funding rates',
+  favicon: 'img/favicon.png',
 
   future: {
     v4: true,
@@ -18,6 +18,24 @@ const config: Config = {
   projectName: 'docs',
 
   onBrokenLinks: 'throw',
+
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'apple-touch-icon',
+        sizes: '180x180',
+        href: '/img/apple-touch-icon.png',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'theme-color',
+        content: '#0a0a0a',
+      },
+    },
+  ],
 
   i18n: {
     defaultLocale: 'en',
@@ -42,12 +60,24 @@ const config: Config = {
   ],
 
   themeConfig: {
+    image: 'img/og-docs.jpg',
+    metadata: [
+      { name: 'og:type', content: 'website' },
+      { name: 'og:site_name', content: 'Settled Documentation' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:site', content: '@zirodelta' },
+      { name: 'twitter:creator', content: '@zirodelta' },
+    ],
     colorMode: {
       defaultMode: 'dark',
       respectPrefersColorScheme: true,
     },
     navbar: {
       title: 'Settled',
+      logo: {
+        alt: 'Settled Logo',
+        src: 'img/logo.svg',
+      },
       items: [
         {
           type: 'docSidebar',
@@ -56,17 +86,19 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'docs',
+          to: '/api-reference/overview',
           position: 'left',
-          label: 'API Reference',
-          docsPluginId: 'default',
+          label: 'API',
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'docs',
+          to: '/protocol/overview',
           position: 'left',
           label: 'Protocol',
+        },
+        {
+          href: 'https://settled.pro',
+          label: 'App',
+          position: 'right',
         },
         {
           href: 'https://github.com/Zirodelta',
@@ -79,46 +111,38 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Documentation',
           items: [
-            {
-              label: 'Introduction',
-              to: '/',
-            },
-            {
-              label: 'API Reference',
-              to: '/api-reference/overview',
-            },
-            {
-              label: 'Protocol',
-              to: '/protocol/overview',
-            },
+            { label: 'Introduction', to: '/' },
+            { label: 'Quickstart', to: '/quickstart' },
+            { label: 'API Reference', to: '/api-reference/overview' },
+            { label: 'Protocol', to: '/protocol/overview' },
           ],
         },
         {
-          title: 'Links',
+          title: 'Guides',
           items: [
-            {
-              label: 'settled.pro',
-              href: 'https://settled.pro',
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/Zirodelta',
-            },
-            {
-              label: 'X (@zirodelta)',
-              href: 'https://x.com/zirodelta',
-            },
+            { label: 'Building a Bot', to: '/guides/building-a-bot' },
+            { label: 'TypeScript SDK', to: '/guides/typescript-sdk' },
+            { label: 'Python SDK', to: '/guides/python-sdk' },
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            { label: 'settled.pro', href: 'https://settled.pro' },
+            { label: 'GitHub', href: 'https://github.com/Zirodelta' },
+            { label: 'X (@zirodelta)', href: 'https://x.com/zirodelta' },
+            { label: 'Discord', href: 'https://discord.gg/Ur85YWJbd' },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Zirodelta. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Zirodelta. All rights reserved.`,
     },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['bash', 'json', 'rust', 'go', 'toml'],
+      additionalLanguages: ['bash', 'json', 'rust', 'go', 'toml', 'python'],
     },
   } satisfies Preset.ThemeConfig,
 };

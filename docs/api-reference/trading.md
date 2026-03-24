@@ -6,7 +6,7 @@ sidebar_position: 4
 
 # Trading
 
-Trades on Settled execute on Solana via the program's `buy_shares` and `sell_shares` instructions. The backend co-signs transactions and syncs confirmed on-chain trades to Postgres.
+Trades on Settled execute on Solana via the program's `buy_shares` and `sell_shares` instructions. The backend co-signs market creation transactions. An on-chain indexer automatically syncs confirmed trades to Postgres — no manual confirmation step is needed.
 
 All authenticated write endpoints require anti-replay headers (see below).
 
@@ -108,50 +108,9 @@ curl -X POST https://api.settled.pro/v1/markets/8166597e-.../co-sign \
 
 Submit the returned transaction to the Solana RPC.
 
-### Step 5: Confirm the trade
+### Step 5: Done
 
-After your transaction is confirmed on-chain, sync it to Postgres so your balance and positions update:
-
-```bash
-POST /v1/trade/confirm
-```
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `market_id` | string | Yes | Market UUID |
-| `tx_sig` | string | Yes | Confirmed Solana transaction signature |
-| `side` | string | Yes | `yes` or `no` |
-| `shares` | string | Yes | Number of shares purchased |
-
-```bash
-curl -X POST https://api.settled.pro/v1/trade/confirm \
-  -H "Authorization: Bearer <jwt>" \
-  -H "X-Request-Nonce: b4c9d3e2f1a0b5c6d7e8f9a0b1c2d3e4" \
-  -H "X-Request-Timestamp: 1742298605" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "market_id": "8166597e-...",
-    "tx_sig": "5KtWMrqHv...",
-    "side": "yes",
-    "shares": "13.698630"
-  }'
-```
-
-**Response:**
-
-```json
-{
-  "data": {
-    "trade_id": "a1b2c3d4-...",
-    "side": "yes",
-    "shares": "13.698630",
-    "cost_usdc": "10.000000",
-    "fee_usdc": "0.100000",
-    "new_yes_price": "0.742000",
-    "new_no_price": "0.258000"
-  }
-}
-```
+Once your transaction confirms on Solana, the on-chain indexer automatically detects it and syncs the trade to Postgres (positions, trade history, leaderboard). No manual confirmation call is needed.
 
 ## How LMSR Pricing Works
 
@@ -167,7 +126,7 @@ Always call the [quote endpoint](/api-reference/markets#get-buy-quote) before la
 
 ## Selling Positions
 
-To exit a position early, use the `sell_shares` Solana instruction with the same on-chain flow. First get a [sell quote](/api-reference/markets#get-sell-quote) to preview proceeds, then build, sign, and confirm the transaction via `POST /v1/trade/confirm`.
+To exit a position early, use the `sell_shares` Solana instruction with the same on-chain flow. First get a [sell quote](/api-reference/markets#get-sell-quote) to preview proceeds, then build, sign, and submit the transaction to Solana. The indexer syncs it automatically.
 
 ## Deprecated Endpoints
 

@@ -25,7 +25,6 @@ curl https://api.settled.pro/v1/users/me \
     "id": "87299673-...",
     "wallet_address": "Dc5tRex7r3EYi7HVNNjr3FkfhytDksWFtT1CLjgVYCSU",
     "display_name": null,
-    "usdc_balance": "89.500000",
     "created_at": "2026-03-17T08:00:00Z",
     "last_active_at": "2026-03-18T09:15:00Z"
   }
@@ -58,26 +57,9 @@ curl https://api.settled.pro/v1/users/87299673-.../profile
 }
 ```
 
-## Get Your Balance
+## Balance
 
-```bash
-GET /v1/users/me/balance
-```
-
-```bash
-curl https://api.settled.pro/v1/users/me/balance \
-  -H "Authorization: Bearer <jwt>"
-```
-
-```json
-{
-  "data": {
-    "usdc_balance": "89.500000",
-    "locked_in_positions": "10.500000",
-    "total": "100.000000"
-  }
-}
-```
+Your USDC balance is read directly from your Solana wallet on-chain. There is no backend balance endpoint — use your wallet adapter or `getTokenAccountBalance` on the USDC associated token account.
 
 ## Get Your Positions
 

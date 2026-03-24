@@ -110,22 +110,6 @@ Sent when a market resolves.
 }
 ```
 
-### Balance Update (authenticated)
-
-Sent when your balance changes (trade, deposit, withdrawal, settlement payout).
-
-```json
-{
-  "type": "balance_update",
-  "channel": "user:Dc5tRex7...",
-  "data": {
-    "usdc_balance": "103.899380",
-    "reason": "settlement_payout",
-    "market_id": "8166597e-..."
-  }
-}
-```
-
 ## Unsubscribe
 
 ```json

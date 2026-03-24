@@ -1,6 +1,6 @@
 ---
 title: On-Chain Integration
-description: Solana program integration — market PDAs, co-signing, and trade confirmation
+description: Solana program integration — market PDAs, co-signing, and trade sync
 sidebar_position: 5
 ---
 
@@ -21,16 +21,16 @@ Solana Program (Settled)
     ├─ validates + executes trade on-chain
     │
     ▼
-POST /v1/trade/confirm   ← user calls after tx confirms
+On-Chain Indexer   ← automatic, no user action needed
     │
     ▼
-Postgres (balance, positions, trade history)
+Postgres (positions, trade history, leaderboard)
 ```
 
 The backend never holds a user's private key. It only:
 1. Lazily creates market PDAs when needed
 2. Co-signs `create_market` transactions with the program authority keypair
-3. Syncs confirmed on-chain transactions to the database
+3. Runs an on-chain indexer that automatically syncs confirmed transactions to the database
 
 ## Market PDAs
 
@@ -119,54 +119,17 @@ const sig = await connection.sendRawTransaction(tx.serialize())
 await connection.confirmTransaction(sig)
 ```
 
-## Confirm a Trade
+## Trade Sync
 
-After your `buy_shares` or `sell_shares` transaction confirms on-chain, call this endpoint to sync the trade to Postgres.
+After your `buy_shares` or `sell_shares` transaction confirms on Solana, the **on-chain indexer** automatically detects it and syncs the trade to Postgres. No manual API call is needed.
 
-```bash
-POST /v1/trade/confirm
-```
+The indexer subscribes to all program logs via WebSocket, parses each transaction, and updates:
+- Trade history
+- User positions
+- Market LMSR state (q_yes, q_no, volume, trade count)
+- Leaderboard stats
 
-Requires JWT. Anti-replay headers required.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `market_id` | string | Yes | Market UUID |
-| `tx_sig` | string | Yes | Confirmed Solana transaction signature |
-| `side` | string | Yes | `yes` or `no` |
-| `shares` | string | Yes | Number of shares purchased or sold |
-
-```bash
-curl -X POST https://api.settled.pro/v1/trade/confirm \
-  -H "Authorization: Bearer <jwt>" \
-  -H "X-Request-Nonce: b4c9d3e2f1a0b5c6d7e8f9a0b1c2d3e4" \
-  -H "X-Request-Timestamp: 1742298605" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "market_id": "8166597e-...",
-    "tx_sig": "5KtWMrqHvTkLpWgNe4r...",
-    "side": "yes",
-    "shares": "13.698630"
-  }'
-```
-
-**Response:**
-
-```json
-{
-  "data": {
-    "trade_id": "a1b2c3d4-...",
-    "side": "yes",
-    "shares": "13.698630",
-    "cost_usdc": "10.000000",
-    "fee_usdc": "0.100000",
-    "new_yes_price": "0.742000",
-    "new_no_price": "0.258000"
-  }
-}
-```
-
-Your balance and positions are updated immediately in Postgres.
+Typical sync latency is under 5 seconds after on-chain confirmation.
 
 ## Full Trade Flow (TypeScript)
 
@@ -212,30 +175,14 @@ async function buyShares(marketId: string, side: 'yes' | 'no', usdcAmount: numbe
   console.log(`Expected: ${quote.shares} shares, price impact: ${quote.price_impact}`)
 
   // 3. Build and sign buy_shares instruction
-  // ... construct Solana transaction for buy_shares ...
   const tradeTx = buildBuySharesTx(ensureData.pda, side, usdcAmount)
   const signedTrade = await wallet.signTransaction(tradeTx)
   const tradeSig = await connection.sendRawTransaction(signedTrade.serialize())
   await connection.confirmTransaction(tradeSig)
 
-  // 4. Confirm trade to Postgres
-  const confirmRes = await fetch(`${API}/trade/confirm`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'X-Request-Nonce': nonce(),
-      'X-Request-Timestamp': ts(),
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      market_id: marketId,
-      tx_sig: tradeSig,
-      side,
-      shares: quote.shares
-    })
-  })
-  const { data: trade } = await confirmRes.json()
-  return trade
+  // Done — the on-chain indexer syncs the trade to Postgres automatically.
+  // Positions and trade history update within seconds.
+  return tradeSig
 }
 
 function nonce() { return crypto.randomUUID().replace(/-/g, '') }

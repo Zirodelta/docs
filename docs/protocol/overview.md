@@ -35,7 +35,7 @@ Settled is a prediction market protocol for crypto funding rates, built on Solan
 
 ### 1. Market Creation
 
-The oracle daemon creates markets based on upcoming funding rate settlement times across exchanges (Binance, Bybit, OKX, etc.). Each market is a binary question:
+The oracle daemon creates markets based on upcoming funding rate settlement times across exchanges (Binance, Bybit, KuCoin, Gate, and Hyperliquid). Each market is a binary question:
 
 > *"Will BTCUSDT funding rate on Binance at 2026-03-19 16:00 UTC be positive?"*
 

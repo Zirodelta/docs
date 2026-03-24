@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Quickstart
 
-This guide walks through placing your first trade. Trades on Settled execute on Solana — the backend co-signs market initialization and syncs confirmed transactions to Postgres.
+This guide walks through placing your first trade. Trades on Settled execute on Solana — the backend co-signs market initialization and an on-chain indexer automatically syncs confirmed trades.
 
 **What you'll need:** A Solana wallet and either test USDC from the faucet or real USDC.
 
@@ -88,37 +88,9 @@ If `status` is `ready`, you're good to go. If it returns `needs_cosign`, follow 
 
 Construct a Solana transaction calling `buy_shares` on the Settled program with your wallet, then submit it to the Solana RPC. For a full TypeScript example, see the [On-Chain Integration](/api-reference/onchain#full-trade-flow-typescript) page.
 
-## 7. Confirm the trade
+## 7. Done — trade syncs automatically
 
-After your transaction confirms on Solana, sync it to Postgres:
-
-```bash
-curl -X POST https://api.settled.pro/v1/trade/confirm \
-  -H "Authorization: Bearer <jwt>" \
-  -H "X-Request-Nonce: b4c9d3e2f1a0b5c6d7e8f9a0b1c2d3e4" \
-  -H "X-Request-Timestamp: 1742298610" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "market_id": "MARKET_ID",
-    "tx_sig": "5KtWMrqHv...",
-    "side": "yes",
-    "shares": "13.698630"
-  }'
-```
-
-```json
-{
-  "data": {
-    "trade_id": "a1b2c3d4-...",
-    "side": "yes",
-    "shares": "13.698630",
-    "cost_usdc": "10.000000",
-    "fee_usdc": "0.100000",
-    "new_yes_price": "0.742000",
-    "new_no_price": "0.258000"
-  }
-}
-```
+Once your transaction confirms on Solana, the on-chain indexer detects it and syncs your trade to Postgres within seconds. No additional API call needed.
 
 You now hold 13.7 YES shares. If the funding rate is positive at settlement, each share pays $1. Your payout: $13.70. Your profit: $3.60 (after the $0.10 fee).
 

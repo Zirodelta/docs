@@ -70,7 +70,7 @@ The authority-based `resolve_market` instruction still exists as a fallback, but
 
 ## Switchboard Integration
 
-[Switchboard](https://switchboard.xyz) is a decentralized oracle network on Solana. Settled uses Switchboard feeds that pull funding rate data from exchange APIs (Binance, Bybit, OKX, etc.).
+[Switchboard](https://switchboard.xyz) is a decentralized oracle network on Solana. Settled uses Switchboard feeds that pull funding rate data from exchange APIs (Binance, Bybit, KuCoin, Gate, and Hyperliquid).
 
 ### Feed Hash
 
